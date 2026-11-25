@@ -16,8 +16,8 @@
     <p class="help">This area is reserved for the archive administrator.</p>
     <form id="login-form">
       <div class="field"><label for="email">Administrator email</label><input id="email" type="email" value="ldeo4442@gmail.com" readonly autocomplete="username"></div>
-      <p class="help">A one-time sign-in link will be sent to this address. Only the configured administrator account can open this area.</p>
-      <div class="actions"><button class="button" id="login-button" type="submit">Email me a sign-in link</button></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password" placeholder="Enter your password"></div><p class="help">Only the configured administrator account can open this area.</p>
+      <div class="actions"><button class="button" id="login-button" type="submit">Sign in</button></div>
       <p class="status" id="login-status" role="status" aria-live="polite"></p>
     </form>
   </section>
