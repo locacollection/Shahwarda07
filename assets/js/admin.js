@@ -114,22 +114,27 @@ async function refreshResponses() {
 }
 document.getElementById("refresh-responses").addEventListener("click", refreshResponses);
 document.getElementById("reset-visitors").addEventListener("click", async () => {
-  if (!currentUser) return;
-  const confirmed = window.confirm("Reset the visitor count to 0? This permanently clears the recorded unique-browser count. Messages and survey responses will not be deleted.");
-  if (!confirmed) return;
   const button = document.getElementById("reset-visitors");
   const status = document.getElementById("responses-status");
-  button.disabled = true;
-  status.textContent = "Resetting visitor count…";
-  const { data, error } = await supabase.rpc("reset_archive_visitors");
-  button.disabled = false;
-  if (error) {
-    status.textContent = "Could not reset the visitor count. Please try again.";
-    console.error(error);
+  if (!currentUser) {
+    status.textContent = "Please sign in again before resetting the visitor count.";
     return;
   }
-  await refreshResponses();
-  status.textContent = "Visitor count reset to 0. " + Number(data || 0).toLocaleString() + " recorded browsers were cleared. Messages and survey responses were kept.";
+  const confirmed = window.confirm("Reset the visitor count to 0? This permanently clears the recorded unique-browser count. Messages and survey responses will not be deleted.");
+  if (!confirmed) return;
+  button.disabled = true;
+  status.textContent = "Resetting visitor count…";
+  try {
+    const { data, error } = await supabase.rpc("reset_archive_visitors");
+    if (error) throw error;
+    await refreshResponses();
+    status.textContent = "Visitor count reset to 0. " + Number(data || 0).toLocaleString() + " recorded browsers were cleared. Messages and survey responses were kept.";
+  } catch (error) {
+    status.textContent = "Reset failed: " + (error?.message || "Please sign in again and retry.");
+    console.error("reset_archive_visitors failed", error);
+  } finally {
+    button.disabled = false;
+  }
 });
 
 document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
@@ -144,10 +149,12 @@ async function loadDashboard(user) {
   currentUser = user; loginPanel.classList.add("hidden"); editorPanel.classList.remove("hidden");
   saveStatus.textContent = "Loading the live website…";
   await refreshResponses();
-  previewFrame.src = "../?exclude=1";
-  previewFrame.onload = () => {
+  if (!previewFrame.src || !previewFrame.src.includes("?exclude=1")) {
+    previewFrame.src = "../?exclude=1";
+  }
+  if (previewFrame.contentDocument?.readyState === "complete" && previewFrame.contentDocument.body) {
     saveStatus.textContent = "Live page loaded. Enable editing to change text directly on the page.";
-  };
+  }
 }
 document.getElementById("login-form").addEventListener("submit", async event => {
   event.preventDefault();
@@ -172,9 +179,18 @@ function getPreviewElements() {
   return [...doc.querySelectorAll(EDITABLE_SELECTOR)];
 }
 function setVisualEditing(enabled) {
-  visualEditing = enabled;
   const doc = previewFrame.contentDocument;
-  if (!doc) return;
+  if (!doc || !doc.body) {
+    saveStatus.textContent = "The live page has not finished loading. Wait for it to appear, then try again.";
+    return;
+  }
+  const elements = getPreviewElements();
+  if (!elements.length) {
+    saveStatus.textContent = "The page loaded, but no editable text was found. Refresh this page and try again.";
+    console.error("No elements matched the visual editor selector:", EDITABLE_SELECTOR);
+    return;
+  }
+  visualEditing = enabled;
   let style = doc.getElementById("archive-visual-editor-style");
   if (!style) {
     style = doc.createElement("style");
@@ -182,7 +198,7 @@ function setVisualEditing(enabled) {
     style.textContent = '[data-archive-editable="true"]{outline:1px dashed #a96f59!important;outline-offset:4px;cursor:text!important} [data-archive-editable="true"]:focus{outline:2px solid #687765!important;background-color:#fffaf055!important}';
     doc.head.appendChild(style);
   }
-  getPreviewElements().forEach((el, i) => {
+  elements.forEach((el, i) => {
     el.dataset.archiveEditKey = "v1-" + i;
     el.dataset.archiveEditable = enabled ? "true" : "false";
     el.contentEditable = enabled ? "true" : "false";
@@ -191,7 +207,9 @@ function setVisualEditing(enabled) {
   });
   document.getElementById("toggle-visual-edit").textContent = enabled ? "Finish editing" : "Enable editing";
   document.getElementById("save-visual-edit").disabled = !enabled;
-  saveStatus.textContent = enabled ? "Editing is on. Click any outlined text in the page to change it." : "Editing is off.";
+  saveStatus.textContent = enabled
+    ? "Editing is on. " + elements.length + " text areas are editable. Click an outlined area to change it."
+    : "Editing is off.";
 }
 previewFrame.addEventListener("load", () => {
   if (visualEditing) setVisualEditing(true);
@@ -202,29 +220,34 @@ document.getElementById("toggle-visual-edit").addEventListener("click", () => {
   setVisualEditing(!visualEditing);
 });
 document.getElementById("save-visual-edit").addEventListener("click", async () => {
-  if (!currentUser) return;
   const button = document.getElementById("save-visual-edit");
+  if (!currentUser) {
+    saveStatus.textContent = "Please sign in again before saving your edits.";
+    return;
+  }
+  const elements = getPreviewElements();
+  if (!elements.length) {
+    saveStatus.textContent = "The live page is not ready. Wait for it to load, then try again.";
+    return;
+  }
   button.disabled = true;
   saveStatus.textContent = "Saving changes…";
-  const edits = {};
-  getPreviewElements().forEach((el, i) => { edits["v1-" + i] = el.innerText.replace(/\r/g, "").trim(); });
-  const { data, error: readError } = await supabase.from("archive_content").select("content").eq("id", "main").single();
-  if (readError) {
-    saveStatus.textContent = "Could not load the saved content. Please try again.";
-    button.disabled = false;
-    console.error(readError);
-    return;
+  try {
+    const edits = {};
+    elements.forEach((el, i) => { edits["v1-" + i] = (el.innerText || el.textContent || "").replace(/\r/g, "").trim(); });
+    const { data, error: readError } = await supabase.from("archive_content").select("content").eq("id", "main").single();
+    if (readError) throw readError;
+    const nextContent = { ...(data.content || {}), visual_edits: edits };
+    const { error } = await supabase.from("archive_content").update({ content: nextContent, updated_at: new Date().toISOString() }).eq("id", "main");
+    if (error) throw error;
+    setVisualEditing(false);
+    saveStatus.textContent = "Saved. The public website will now show your changes.";
+  } catch (error) {
+    saveStatus.textContent = "Save failed: " + (error?.message || "Please sign in again and retry.");
+    console.error("Saving visual edits failed", error);
+  } finally {
+    button.disabled = !visualEditing;
   }
-  const nextContent = { ...(data.content || {}), visual_edits: edits };
-  const { error } = await supabase.from("archive_content").update({ content: nextContent, updated_at: new Date().toISOString() }).eq("id", "main");
-  button.disabled = false;
-  if (error) {
-    saveStatus.textContent = "Could not save changes. Your edits are still visible here.";
-    console.error(error);
-    return;
-  }
-  setVisualEditing(false);
-  saveStatus.textContent = "Saved. The public website will now show your changes.";
 });
 const { data: sessionData } = await supabase.auth.getSession();
 if (sessionData.session) await loadDashboard(sessionData.session.user);
