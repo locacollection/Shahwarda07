@@ -144,7 +144,7 @@ async function loadDashboard(user) {
   currentUser = user; loginPanel.classList.add("hidden"); editorPanel.classList.remove("hidden");
   saveStatus.textContent = "Loading the live website…";
   await refreshResponses();
-  previewFrame.src = "../";
+  previewFrame.src = "../?exclude=1";
   previewFrame.onload = () => {
     saveStatus.textContent = "Live page loaded. Enable editing to change text directly on the page.";
   };
