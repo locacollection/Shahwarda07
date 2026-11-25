@@ -71,30 +71,70 @@ function showLogin(message) {
   loginPanel.classList.remove("hidden"); editorPanel.classList.add("hidden");
   if (message) loginStatus.textContent = message;
 }
+let dashboardData = null, activeResponseFilter = "all";
+function answerLabel(key) {
+  return ({ q1: "Looking back", q2: "What matters in an apology", q3: "A conversation someday" })[key] || key;
+}
+function renderResponses() {
+  const list = document.getElementById("responses-list");
+  const status = document.getElementById("responses-status");
+  if (!dashboardData) { list.innerHTML = ""; return; }
+  const all = Array.isArray(dashboardData.submissions) ? dashboardData.submissions : [];
+  const items = activeResponseFilter === "all" ? all : all.filter(item => item.submission_type === activeResponseFilter);
+  status.textContent = items.length ? items.length + (items.length === 1 ? " submission" : " submissions") : "Nothing has been submitted here yet.";
+  if (!items.length) { list.innerHTML = ""; return; }
+  list.innerHTML = items.map(item => {
+    const date = new Date(item.created_at);
+    const when = Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    const isMessage = item.submission_type === "message";
+    const body = isMessage
+      ? '<p class="response-message">' + esc(item.message || "") + '</p>'
+      : '<dl class="answer-list">' + Object.entries(item.answers || {}).map(([key, value]) => '<div><dt>' + esc(answerLabel(key)) + '</dt><dd>' + esc(value) + '</dd></div>').join("") + '</dl>';
+    return '<article class="response-card"><div class="response-card-head"><span class="response-kind">' + (isMessage ? "Written note" : "Survey answers") + '</span><time>' + esc(when) + '</time></div>' + body + '</article>';
+  }).join("");
+}
+async function refreshResponses() {
+  const status = document.getElementById("responses-status");
+  const button = document.getElementById("refresh-responses");
+  button.disabled = true; status.textContent = "Checking for new submissions…";
+  const { data, error } = await supabase.rpc("get_archive_dashboard");
+  button.disabled = false;
+  if (error) {
+    status.textContent = "Could not load the private dashboard. Check that you are signed in with the administrator account.";
+    console.error(error); return;
+  }
+  dashboardData = data;
+  document.getElementById("stat-visitors").textContent = Number(data.visitor_count || 0).toLocaleString();
+  document.getElementById("stat-messages").textContent = Number(data.message_count || 0).toLocaleString();
+  document.getElementById("stat-surveys").textContent = Number(data.survey_count || 0).toLocaleString();
+  renderResponses();
+}
+document.getElementById("refresh-responses").addEventListener("click", refreshResponses);
+document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+  activeResponseFilter = button.dataset.filter;
+  document.querySelectorAll("[data-filter]").forEach(item => item.classList.toggle("active", item === button));
+  renderResponses();
+}));
 async function loadDashboard(user) {
   if (!user || (user.email || "").toLowerCase() !== ADMIN_EMAIL) {
     await supabase.auth.signOut(); showLogin("This account is not authorized for the archive."); return;
   }
   currentUser = user; loginPanel.classList.add("hidden"); editorPanel.classList.remove("hidden");
   saveStatus.textContent = "Loading your archive…";
+  await refreshResponses();
   const { data, error } = await supabase.from("archive_content").select("content").eq("id", "main").single();
   if (error) { saveStatus.textContent = "Could not load saved content. Check the Supabase Data API exposure setting."; console.error(error); return; }
   content = mergeContent(data.content); renderEditor(); saveStatus.textContent = "Ready to edit.";
 }
 document.getElementById("login-form").addEventListener("submit", async event => {
   event.preventDefault();
-  const button = document.getElementById("login-button"); button.disabled = true; loginStatus.textContent = "Signing in…";
-  const password = document.getElementById("password").value;
-  const { data, error } = await supabase.auth.signInWithPassword({ email: ADMIN_EMAIL, password });
+  const button = document.getElementById("login-button"); button.disabled = true; loginStatus.textContent = "Sending a sign-in link…";
+  const { error } = await supabase.auth.signInWithOtp({ email: ADMIN_EMAIL });
   button.disabled = false;
-  if (error) { loginStatus.textContent = "Sign-in failed. Check your password and try again."; console.error(error); return; }
-  await loadDashboard(data.user);
-});
-document.getElementById("reset-button").addEventListener("click", async () => {
-  loginStatus.textContent = "Sending password reset email…";
-  const redirectTo = new URL("./", window.location.href).href;
-  const { error } = await supabase.auth.resetPasswordForEmail(ADMIN_EMAIL, { redirectTo });
-  loginStatus.textContent = error ? "Could not send the reset email. Please try again later." : "If the account exists, a password reset email has been sent.";
+  loginStatus.textContent = error
+    ? "Could not send the sign-in link. Please try again later."
+    : "If this is the configured administrator address, a one-time link has been sent. Open it, then return to this page.";
+  if (error) console.error(error);
 });
 document.getElementById("logout-button").addEventListener("click", async () => {
   await supabase.auth.signOut(); currentUser = null; document.getElementById("password").value = ""; showLogin("You have signed out.");
