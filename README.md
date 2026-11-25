@@ -1,32 +1,28 @@
 # Somewhere in the Archive
 
-This website is intentionally modular. Edit most of it directly in GitHub without touching the code.
+The public archive is a static GitHub Pages site. Its private editor lives at /manage/ and uses Supabase Auth, Database, and Storage.
 
-## Where to edit
-- Homepage/title and navigation: `index.html`
-- Visual style, fonts, spacing, colors: `assets/css/styles.css`
-- Interaction behavior and section loader: `assets/js/site.js`
-- Hero/intro: `content/sections/hero.html`
-- Memory cards: `content/sections/fragments.html`
-- Timeline: `content/sections/timeline.html`
-- Quote and reflection: `content/sections/notes.html`
-- Small interactive clue: `content/sections/clue.html`
-- Closing note: `content/sections/closing.html`
+## Public site
+- index.html and assets/css/styles.css define the public shell and visual style.
+- content/sections/ contains the original static fallback sections.
+- assets/js/archive-data.js defines the editable content model and safe public renderer.
+- assets/js/site.js loads published content from Supabase, falling back to the static section files if the service is unavailable.
 
-## Editing a section
-1. Open this repository on GitHub.
-2. Open the file listed above.
-3. Press the pencil icon (Edit).
-4. Make your changes and click **Commit changes**.
+## Private editor
+- Open https://locacollection.github.io/Shahwarda07/manage/.
+- Sign in with the one authorized administrator account.
+- Edit the hero, memory cards, timeline, notes, optional interaction, and closing text.
+- Upload photos to the public archive-media bucket, then choose Save and publish.
+- The public site reads the saved content directly from Supabase. No GitHub commit is needed for ordinary content edits.
 
-Each section is separate. Editing one section doesn't require editing the others.
+## Security
+- assets/js/supabase-config.js contains only the public Supabase URL and publishable key. These are designed for browser use.
+- The Supabase database keeps the administrator UUID in a private schema. A database trigger only permits creation of the configured administrator email and registers that account.
+- Row Level Security protects content updates and media uploads. The public site can read published content and public media, but cannot edit either.
+- The editor has no sign-up form and is not linked from the public navigation. The database also rejects account creation for any other email.
+- Do not upload private conversations, personal information, or photographs unless you have permission to publish them.
 
-## Adding photographs
-Upload images to `assets/images/`. In the relevant section file, replace the `media-slot` placeholder with an image element:
-```html
-<img class="archive-photo" src="assets/images/village.jpg" alt="A quiet village road">
-```
-Use descriptive alt text and avoid publishing private details or images without permission.
-
-## Publishing
-A commit automatically starts GitHub Pages deployment. It may take a few minutes for changes to appear online.
+## First-time setup still required
+1. In Supabase Authentication, invite the configured administrator email and accept the invitation to set a password.
+2. In Project Settings > API / Data API, ensure public.archive_content is exposed to the Data API. Its SQL grants and Row Level Security policies are already configured.
+3. Add https://locacollection.github.io and https://locacollection.github.io/Shahwarda07/manage/ to the Auth redirect URL allowlist if you use password recovery.
