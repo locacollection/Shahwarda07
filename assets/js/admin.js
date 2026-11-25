@@ -6,7 +6,7 @@ const loginPanel = document.getElementById("login-panel"), editorPanel = documen
 const loginStatus = document.getElementById("login-status"), saveStatus = document.getElementById("save-status");
 const editorFields = document.getElementById("editor-fields");
 const previewFrame = document.getElementById("site-preview");
-const EDITABLE_SELECTOR = ".hero h1, .hero .eyebrow, .hero .intro, .hero .small, .hero .down, main h1, main h2, main h3, main p, main .number, main .tiny, main .small, main .eyebrow, main .intro, main .paper.poem, .final .small, .footer";
+const EDITABLE_SELECTOR = ".hero h1, .hero .eyebrow, .hero .intro, .hero .small, .hero .down, main h1, main h2, main h3, main p, main .number, main .tiny, main .small, main .eyebrow, main .intro, main .paper.poem, .final .small";
 let visualEditing = false;
 let content = structuredClone(DEFAULT_CONTENT), currentUser = null;
 function esc(value) {
