@@ -55,17 +55,31 @@
  const input=document.getElementById('answer'), check=document.getElementById('check'), feedback=document.getElementById('feedback'), unlocked=document.getElementById('unlocked');
  function unlock(){const word=input.value.trim().toUpperCase().replace(/\s+/g,'');if(word==='STILL'){unlocked.classList.add('show');feedback.textContent='That’s it. The next page is open.';unlocked.scrollIntoView({behavior:'smooth',block:'center'});}else{feedback.textContent=word?'Not quite. Try the first letter of each line.':'Whenever you are ready.';}}
  check.addEventListener('click',unlock);input.addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+ function isExcludedDevice(){
+  try{
+   if(new URLSearchParams(window.location.search).get('exclude')==='1'){
+    localStorage.setItem('archive-exclude-from-count','1');
+    const cleanUrl=new URL(window.location.href);cleanUrl.searchParams.delete('exclude');
+    window.history.replaceState({},'',cleanUrl.pathname+cleanUrl.hash);
+   }
+   return localStorage.getItem('archive-exclude-from-count')==='1';
+  }catch(e){return false;}
+ }
  function getVisitorId(){
   try{let id=localStorage.getItem('archive-visitor-id');if(!id){id=(crypto.randomUUID?crypto.randomUUID():('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16);})));localStorage.setItem('archive-visitor-id',id);}return id;}
   catch(e){return crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16);});}
  }
- fetch(SUPABASE_URL+'/rest/v1/rpc/record_archive_visit',{
-  method:'POST',
-  headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
-  body:JSON.stringify({p_visitor_id:getVisitorId()})
- }).then(r=>{if(!r.ok)throw new Error('Counter unavailable');return r.json();})
- .then(count=>{document.getElementById('visit-count').textContent=String(count);})
- .catch(()=>{document.getElementById('visit-count').textContent='unavailable';});
+ if(isExcludedDevice()){
+  document.getElementById('visit-count').textContent='this device is not counted';
+ }else{
+  fetch(SUPABASE_URL+'/rest/v1/rpc/record_archive_visit',{
+   method:'POST',
+   headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+   body:JSON.stringify({p_visitor_id:getVisitorId()})
+  }).then(r=>{if(!r.ok)throw new Error('Counter unavailable');return r.json();})
+  .then(count=>{document.getElementById('visit-count').textContent=String(count);})
+  .catch(()=>{document.getElementById('visit-count').textContent='unavailable';});
+ }
  document.getElementById('reflect').addEventListener('click',()=>{const names=['Looking back','An apology','A conversation'];const answers=names.map((n,i)=>{const selected=document.querySelector('input[name="q'+(i+1)+'"]:checked');return n+': '+(selected?selected.value:'Skipped');});document.getElementById('answer-summary').textContent=answers.join(' · ');const panel=document.getElementById('reflection');panel.classList.add('show');panel.scrollIntoView({behavior:'smooth',block:'nearest'});});
  document.getElementById('send-survey').addEventListener('click',async()=>{
   const status=document.getElementById('survey-status'),consent=document.getElementById('survey-consent'),button=document.getElementById('send-survey');
