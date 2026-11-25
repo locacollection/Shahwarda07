@@ -5,6 +5,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const loginPanel = document.getElementById("login-panel"), editorPanel = document.getElementById("editor-panel");
 const loginStatus = document.getElementById("login-status"), saveStatus = document.getElementById("save-status");
 const editorFields = document.getElementById("editor-fields");
+const previewFrame = document.getElementById("site-preview");
+const EDITABLE_SELECTOR = ".hero h1, .hero .eyebrow, .hero .intro, .hero .small, .hero .down, main h1, main h2, main h3, main p, main .number, main .tiny, main .small, main .eyebrow, main .intro, main .paper.poem, .final .small, .footer";
+let visualEditing = false;
 let content = structuredClone(DEFAULT_CONTENT), currentUser = null;
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
@@ -139,11 +142,12 @@ async function loadDashboard(user) {
     await supabase.auth.signOut(); showLogin("This account is not authorized for the archive."); return;
   }
   currentUser = user; loginPanel.classList.add("hidden"); editorPanel.classList.remove("hidden");
-  saveStatus.textContent = "Loading your archive…";
+  saveStatus.textContent = "Loading the live website…";
   await refreshResponses();
-  const { data, error } = await supabase.from("archive_content").select("content").eq("id", "main").single();
-  if (error) { saveStatus.textContent = "Could not load saved content. Check the Supabase Data API exposure setting."; console.error(error); return; }
-  content = mergeContent(data.content); renderEditor(); saveStatus.textContent = "Ready to edit.";
+  previewFrame.src = "../";
+  previewFrame.onload = () => {
+    saveStatus.textContent = "Live page loaded. Enable editing to change text directly on the page.";
+  };
 }
 document.getElementById("login-form").addEventListener("submit", async event => {
   event.preventDefault();
@@ -162,42 +166,65 @@ document.getElementById("login-form").addEventListener("submit", async event => 
 document.getElementById("logout-button").addEventListener("click", async () => {
   await supabase.auth.signOut(); currentUser = null; document.getElementById("password").value = ""; showLogin("You have signed out.");
 });
-document.getElementById("editor-form").addEventListener("input", event => {
-  if (event.target.dataset.field) setPath(event.target.dataset.field, event.target.value);
+function getPreviewElements() {
+  const doc = previewFrame.contentDocument;
+  if (!doc) return [];
+  return [...doc.querySelectorAll(EDITABLE_SELECTOR)];
+}
+function setVisualEditing(enabled) {
+  visualEditing = enabled;
+  const doc = previewFrame.contentDocument;
+  if (!doc) return;
+  let style = doc.getElementById("archive-visual-editor-style");
+  if (!style) {
+    style = doc.createElement("style");
+    style.id = "archive-visual-editor-style";
+    style.textContent = '[data-archive-editable="true"]{outline:1px dashed #a96f59!important;outline-offset:4px;cursor:text!important} [data-archive-editable="true"]:focus{outline:2px solid #687765!important;background-color:#fffaf055!important}';
+    doc.head.appendChild(style);
+  }
+  getPreviewElements().forEach((el, i) => {
+    el.dataset.archiveEditKey = "v1-" + i;
+    el.dataset.archiveEditable = enabled ? "true" : "false";
+    el.contentEditable = enabled ? "true" : "false";
+    el.spellcheck = enabled;
+    el.style.whiteSpace = "pre-line";
+  });
+  document.getElementById("toggle-visual-edit").textContent = enabled ? "Finish editing" : "Enable editing";
+  document.getElementById("save-visual-edit").disabled = !enabled;
+  saveStatus.textContent = enabled ? "Editing is on. Click any outlined text in the page to change it." : "Editing is off.";
+}
+previewFrame.addEventListener("load", () => {
+  if (visualEditing) setVisualEditing(true);
+  else saveStatus.textContent = "Live page loaded. Enable editing to change text directly on the page.";
 });
-document.getElementById("editor-form").addEventListener("submit", async event => {
-  event.preventDefault(); if (!currentUser) return;
-  const button = document.getElementById("save-button"); button.disabled = true; saveStatus.textContent = "Publishing…";
-  const { error } = await supabase.from("archive_content").update({ content, updated_at: new Date().toISOString() }).eq("id", "main");
+document.getElementById("toggle-visual-edit").addEventListener("click", () => {
+  if (!previewFrame.contentDocument?.body) { saveStatus.textContent = "The live page is still loading. Please wait a moment."; return; }
+  setVisualEditing(!visualEditing);
+});
+document.getElementById("save-visual-edit").addEventListener("click", async () => {
+  if (!currentUser) return;
+  const button = document.getElementById("save-visual-edit");
+  button.disabled = true;
+  saveStatus.textContent = "Saving changes…";
+  const edits = {};
+  getPreviewElements().forEach((el, i) => { edits["v1-" + i] = el.innerText.replace(/\r/g, "").trim(); });
+  const { data, error: readError } = await supabase.from("archive_content").select("content").eq("id", "main").single();
+  if (readError) {
+    saveStatus.textContent = "Could not load the saved content. Please try again.";
+    button.disabled = false;
+    console.error(readError);
+    return;
+  }
+  const nextContent = { ...(data.content || {}), visual_edits: edits };
+  const { error } = await supabase.from("archive_content").update({ content: nextContent, updated_at: new Date().toISOString() }).eq("id", "main");
   button.disabled = false;
-  saveStatus.textContent = error ? "Could not publish. Your changes are still in this editor." : "Published. The public archive now shows your changes.";
-  if (error) console.error(error);
-});
-editorFields.addEventListener("click", event => {
-  const removeCard = event.target.closest("[data-remove-card]"), removeTimeline = event.target.closest("[data-remove-timeline]");
-  const clearImage = event.target.closest("[data-clear-image]");
-  if (removeCard) { content.fragments.cards.splice(Number(removeCard.dataset.removeCard), 1); renderEditor(); }
-  else if (removeTimeline) { content.timeline.items.splice(Number(removeTimeline.dataset.removeTimeline), 1); renderEditor(); }
-  else if (clearImage) { const card = content.fragments.cards[Number(clearImage.dataset.clearImage)]; card.image_url = ""; card.image_alt = ""; renderEditor(); }
-  else if (event.target.id === "add-card") {
-    content.fragments.cards.push({ eyebrow: String(content.fragments.cards.length + 1).padStart(2, "0") + " · A memory", title: "A new fragment", body: "", caption: "ADD A SHORT CAPTION", image_url: "", image_alt: "" }); renderEditor();
-  } else if (event.target.id === "add-timeline") { content.timeline.items.push({ label: "A moment", title: "A new memory", body: "" }); renderEditor(); }
-});
-editorFields.addEventListener("change", async event => {
-  const input = event.target;
-  if (!input.matches("[data-upload-card]") || !input.files || !input.files[0]) return;
-  const file = input.files[0], index = Number(input.dataset.uploadCard);
-  if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) { saveStatus.textContent = "Choose an image file smaller than 8 MB."; input.value = ""; return; }
-  saveStatus.textContent = "Uploading photo…"; input.disabled = true;
-  const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(-80);
-  const path = "archive/" + crypto.randomUUID() + "-" + safeName;
-  const { error } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
-  input.disabled = false;
-  if (error) { saveStatus.textContent = "Photo upload failed. Please try again."; console.error(error); return; }
-  const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
-  content.fragments.cards[index].image_url = data.publicUrl;
-  if (!content.fragments.cards[index].image_alt) content.fragments.cards[index].image_alt = content.fragments.cards[index].title;
-  renderEditor(); saveStatus.textContent = "Photo uploaded. Save and publish to show it on the public site.";
+  if (error) {
+    saveStatus.textContent = "Could not save changes. Your edits are still visible here.";
+    console.error(error);
+    return;
+  }
+  setVisualEditing(false);
+  saveStatus.textContent = "Saved. The public website will now show your changes.";
 });
 const { data: sessionData } = await supabase.auth.getSession();
 if (sessionData.session) await loadDashboard(sessionData.session.user);
