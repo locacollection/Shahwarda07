@@ -16,8 +16,8 @@
     <p class="help">This area is reserved for the archive administrator.</p>
     <form id="login-form">
       <div class="field"><label for="email">Administrator email</label><input id="email" type="email" value="ldeo4442@gmail.com" readonly autocomplete="username"></div>
-      <div class="field"><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password" placeholder="Your password"></div>
-      <div class="actions"><button class="button" id="login-button" type="submit">Sign in</button><button class="button secondary" id="reset-button" type="button">Send password reset</button></div>
+      <p class="help">A one-time sign-in link will be sent to this address. Only the configured administrator account can open this area.</p>
+      <div class="actions"><button class="button" id="login-button" type="submit">Email me a sign-in link</button></div>
       <p class="status" id="login-status" role="status" aria-live="polite"></p>
     </form>
   </section>
@@ -26,6 +26,17 @@
       <div class="actions"><a class="button secondary" href="../" target="_blank" rel="noopener">Preview public site</a><button class="button secondary" id="logout-button" type="button">Sign out</button></div>
     </div>
     <section class="panel" id="account-panel"><div class="eyebrow">Account security</div><h2>Set or change your password</h2><p class="help">Use this after accepting the administrator invitation, or whenever you want to update your password.</p><form id="password-form"><div class="field"><label for="new-password">New password</label><input id="new-password" type="password" minlength="10" required autocomplete="new-password"></div><div class="field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" minlength="10" required autocomplete="new-password"></div><div class="actions"><button class="button secondary" type="submit">Update password</button><span class="status" id="password-status" role="status" aria-live="polite"></span></div></form></section>
+    <section class="panel responses-panel" id="responses-panel">
+      <div class="responses-head"><div><div class="eyebrow">Visitor activity</div><h2>Visits and replies</h2><p class="help">A private view of the counter and anything submitted through the public archive.</p></div><button class="button secondary" id="refresh-responses" type="button">Refresh</button></div>
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-label">Unique browsers</span><strong class="stat-value" id="stat-visitors">—</strong><span class="small">Recorded page visitors</span></div>
+        <div class="stat-card"><span class="stat-label">Messages</span><strong class="stat-value" id="stat-messages">—</strong><span class="small">Notes sent through the page</span></div>
+        <div class="stat-card"><span class="stat-label">Survey responses</span><strong class="stat-value" id="stat-surveys">—</strong><span class="small">Submitted sets of answers</span></div>
+      </div>
+      <div class="responses-toolbar"><div class="eyebrow">Submissions</div><div class="filter-row"><button class="filter-button active" type="button" data-filter="all">All</button><button class="filter-button" type="button" data-filter="message">Messages</button><button class="filter-button" type="button" data-filter="survey">Survey answers</button></div></div>
+      <p class="status" id="responses-status" role="status" aria-live="polite">Loading submissions…</p>
+      <div id="responses-list" class="responses-list"></div>
+    </section>
     <form id="editor-form" class="panel"><div id="editor-fields"></div>
       <div class="actions"><button class="button" id="save-button" type="submit">Save and publish</button><span class="status" id="save-status" role="status" aria-live="polite"></span></div>
     </form>
