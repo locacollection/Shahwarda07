@@ -128,14 +128,17 @@ async function loadDashboard(user) {
 }
 document.getElementById("login-form").addEventListener("submit", async event => {
   event.preventDefault();
-  const button = document.getElementById("login-button"); button.disabled = true; loginStatus.textContent = "Sending a sign-in link…";
-  const redirectTo = new URL("./", window.location.href).href;
-  const { error } = await supabase.auth.signInWithOtp({ email: ADMIN_EMAIL, options: { emailRedirectTo: redirectTo } });
+  const button = document.getElementById("login-button");
+  const password = document.getElementById("password").value;
+  button.disabled = true; loginStatus.textContent = "Signing in…";
+  const { data, error } = await supabase.auth.signInWithPassword({ email: ADMIN_EMAIL, password });
   button.disabled = false;
-  loginStatus.textContent = error
-    ? "Could not send the sign-in link. Please try again later."
-    : "If this is the configured administrator address, a one-time link has been sent. Open it, then return to this page.";
-  if (error) console.error(error);
+  if (error) {
+    loginStatus.textContent = "Sign-in failed. Check your password and try again.";
+    console.error(error);
+    return;
+  }
+  await loadDashboard(data.user);
 });
 document.getElementById("logout-button").addEventListener("click", async () => {
   await supabase.auth.signOut(); currentUser = null; document.getElementById("password").value = ""; showLogin("You have signed out.");
