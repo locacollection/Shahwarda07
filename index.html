@@ -6,64 +6,19 @@
 <meta name="theme-color" content="#0b0c10">
 <meta name="description" content="A quiet, personal archive of places, moments, and things time kept.">
 <title>Somewhere in the Archive</title>
-<style>
-:root{--bg:#0b0c10;--panel:#12151c;--panel2:#171b24;--line:#303440;--text:#eeeae3;--muted:#a4a3a0;--gold:#c7a982;--gold2:#8c7357;--serif:Georgia,'Times New Roman',serif;--sans:Arial,Helvetica,sans-serif}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#292630 0,#101117 38%,var(--bg) 72%);color:var(--text);font:16px/1.75 var(--serif);-webkit-font-smoothing:antialiased}
-a{color:inherit}.wrap{width:min(1080px,calc(100% - 44px));margin:auto}
-.topbar{position:fixed;z-index:10;inset:0 0 auto;background:#0b0c10d9;border-bottom:1px solid #ffffff12;backdrop-filter:blur(14px)}
-.nav{height:68px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand,.navlinks,.eyebrow,.kicker,.index,.micro,button,label,.scrollcue,footer{font-family:var(--sans);text-transform:uppercase;letter-spacing:.16em}
-.brand{font-size:10px;color:var(--gold);white-space:nowrap}.navlinks{display:flex;gap:25px}.navlinks a{font-size:9px;text-decoration:none;color:#b9b7b3;transition:color .2s}.navlinks a:hover{color:var(--gold)}
-.hero{min-height:100svh;display:grid;place-items:center;text-align:center;padding:130px 0 76px;position:relative}.hero-inner{max-width:800px}.eyebrow{font-size:10px;color:var(--gold)}h1{font-weight:400;font-size:clamp(48px,9vw,100px);line-height:.99;letter-spacing:-.055em;margin:27px 0 25px}.hero-copy{max-width:590px;margin:auto;color:var(--muted);font-size:17px}.ornament{height:1px;width:62px;background:var(--gold2);margin:34px auto}.scrollcue{font-size:9px;color:#777;margin-top:76px;display:inline-flex;align-items:center;gap:12px}.scrollcue:after{content:"";height:28px;width:1px;background:var(--gold2);display:inline-block}
-section{padding:112px 0;border-top:1px solid #ffffff12}.section-head{display:flex;align-items:baseline;gap:18px;margin-bottom:22px}.index{font-size:10px;color:var(--gold)}h2{font-size:clamp(34px,5.2vw,55px);font-weight:400;letter-spacing:-.04em;line-height:1.1;margin:0}.lead{max-width:670px;color:var(--muted);margin:0 0 42px;font-size:16px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card{position:relative;min-height:280px;padding:28px;background:linear-gradient(145deg,#1a1d26,#11141b 72%);border:1px solid var(--line);overflow:hidden;transition:transform .3s,border-color .3s}.card:hover{transform:translateY(-4px);border-color:#75634d}.card:before{content:"";position:absolute;width:180px;height:180px;border:1px solid #c7a98212;border-radius:50%;right:-90px;top:-100px}.card .index{font-size:9px}.card h3{font-size:29px;line-height:1.15;font-weight:400;margin:18px 0 12px}.card p{font-size:14px;color:var(--muted);max-width:390px;margin:0}.media-slot{min-height:82px;margin-top:25px;border:1px dashed #454957;display:grid;place-items:center;padding:14px;color:#85858c;font:9px/1.6 var(--sans);letter-spacing:.13em;text-align:center}
-.wide-note{padding:44px;border:1px solid var(--line);background:linear-gradient(135deg,#171a22,#101219);position:relative}.wide-note:after{content:"";position:absolute;right:28px;top:24px;width:44px;height:1px;background:var(--gold2)}.quote{font-size:clamp(26px,4.5vw,46px);line-height:1.38;max-width:800px;margin:0}.quote em{color:var(--gold);font-style:normal}.attribution{font:9px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#85858c;margin-top:26px}
-.timeline{max-width:760px;margin:0 auto;position:relative}.timeline:before{content:"";position:absolute;left:8px;top:12px;bottom:12px;width:1px;background:linear-gradient(var(--gold2),#454957,transparent)}.moment{position:relative;padding:0 0 42px 42px}.moment:last-child{padding-bottom:0}.moment:before{content:"";position:absolute;left:3px;top:10px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1px solid var(--gold)}.moment .micro{font-size:9px;color:var(--gold)}.moment h3{font-size:25px;font-weight:400;margin:8px 0}.moment p{color:var(--muted);font-size:14px;margin:0;max-width:650px}
-.cluebox{max-width:680px;padding:32px;background:#11141b;border:1px solid var(--line)}.cluebox p{color:var(--muted);margin:12px 0 22px}.cluebox label{font-size:9px;color:var(--gold)}.answerrow{display:flex;gap:10px}.answerrow input{min-width:0;flex:1;background:#090b10;border:1px solid #383d49;color:var(--text);padding:14px 15px;font:16px var(--serif);outline:none}.answerrow input:focus{border-color:var(--gold2)}button{border:0;background:var(--gold);color:#17130f;padding:0 22px;font-size:9px;cursor:pointer;transition:background .2s}button:hover{background:#dfc39e}.feedback{min-height:25px;margin-top:13px;color:var(--gold);font-size:13px}.smallprint{font:10px/1.6 var(--sans);color:#747680;margin-top:20px;letter-spacing:.04em;text-transform:none}
-.closing{text-align:center;padding:130px 0 120px}.closing h2{margin:20px 0}.closing p{max-width:540px;margin:auto;color:var(--muted)}footer{text-align:center;padding:25px 0 48px;color:#777;font-size:9px;border-top:1px solid #ffffff12}
-@media(max-width:700px){.nav{height:60px}.navlinks{gap:12px}.navlinks a{font-size:8px;letter-spacing:.1em}.brand{font-size:9px}.cards{grid-template-columns:1fr}.card{min-height:245px}.wide-note{padding:30px 24px}section{padding:82px 0}.answerrow{flex-direction:column}.answerrow button{padding:15px}.scrollcue{margin-top:56px}}
-@media(max-width:390px){.wrap{width:calc(100% - 30px)}.navlinks{gap:8px}.navlinks a{font-size:7px}.brand{font-size:8px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
-</style>
+<link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-<div class="topbar"><nav class="wrap nav" aria-label="Main navigation"><a class="brand" href="#top" style="text-decoration:none">The Archive · No. 01</a><div class="navlinks"><a href="#fragments">Fragments</a><a href="#timeline">A little time</a><a href="#notes">Notes</a><a href="#clue">Clue</a></div></nav></div>
-<header class="hero wrap" id="top"><div class="hero-inner"><div class="eyebrow">A collection of things time kept</div><h1>Somewhere<br>in the Archive</h1><div class="ornament"></div><p class="hero-copy">Some memories don't ask to be explained. They simply remain, quietly, in the places we left them.</p><div class="scrollcue">Take your time</div></div></header>
+<div class="topbar"><nav class="wrap nav" aria-label="Main navigation"><a class="brand" href="#top">The Archive · No. 01</a><div class="navlinks"><a href="#fragments">Fragments</a><a href="#timeline">A little time</a><a href="#notes">Notes</a><a href="#clue">Clue</a></div></nav></div>
+<div id="hero-module"></div>
 <main>
-<section id="fragments"><div class="wrap"><div class="section-head"><span class="index">01 /</span><h2>Fragments</h2></div><p class="lead">A few small windows into another time. Each space can hold a photograph, a sentence, or a detail that might otherwise fade.</p>
-<div class="cards">
-<article class="card"><span class="index">01 · A place</span><h3>The village</h3><p>Familiar roads, quiet afternoons, doorways, and the feeling of knowing every turn by heart.</p><div class="media-slot">YOUR PHOTOGRAPH OR A SHORT CAPTION</div></article>
-<article class="card"><span class="index">02 · A season</span><h3>School days</h3><p>Classrooms, notebooks, shared mischief, and ordinary days that only later became keepsakes.</p><div class="media-slot">YOUR PHOTOGRAPH OR A SHORT CAPTION</div></article>
-<article class="card"><span class="index">03 · Words</span><h3>Pages and conversations</h3><p>A few carefully chosen words, a poem, or a page from an older chapter. Keep private details out of anything shared publicly.</p><div class="media-slot">A POEM, EXCERPT, OR REDACTED IMAGE</div></article>
-<article class="card"><span class="index">04 · After hours</span><h3>Worlds we visited</h3><p>Old games, familiar maps, late sessions, and the little escapes that made time disappear.</p><div class="media-slot">A GAME IMAGE, SCREENSHOT, OR VIDEO LINK</div></article>
-</div></div></section>
-<section id="timeline"><div class="wrap"><div class="section-head"><span class="index">02 /</span><h2>A little time</h2></div><p class="lead">Not a complete history. Just a few markers along the way, with room for the details only you would know.</p>
-<div class="timeline">
-<div class="moment"><div class="micro">Then · The beginning</div><h3>Before everything had a name</h3><p>Write a few lines about an early place, a familiar routine, or a small memory that stayed with you.</p></div>
-<div class="moment"><div class="micro">Later · The in-between</div><h3>Days that carried on</h3><p>Add a moment from school, a game, a journey, or a time when life quietly changed direction.</p></div>
-<div class="moment"><div class="micro">Now · Looking back</div><h3>What remains</h3><p>Some things are worth remembering without needing to bring them back. This space can hold that thought.</p></div>
-</div></div></section>
-<section id="notes"><div class="wrap"><div class="section-head"><span class="index">03 /</span><h2>Notes to time</h2></div><div class="wide-note"><p class="quote">“Some things become memories before we understand <em>what they meant.</em>”</p><div class="attribution">A note kept in the archive</div></div><div style="max-width:700px;margin:34px 0 0 22px;border-left:1px solid var(--gold2);padding:4px 0 4px 24px"><div class="eyebrow">For the pages ahead</div><p style="color:var(--muted);font-size:14px">Use this space for a short reflection, a poem, or a few honest lines. It does not need to ask anything of anyone. It can simply be true.</p></div></div></section>
-<section id="clue"><div class="wrap"><div class="section-head"><span class="index">04 /</span><h2>A small pause</h2></div><p class="lead">A tiny optional interaction, just for this page. The answer is checked in your browser and is not saved or sent anywhere.</p><div class="cluebox"><div class="eyebrow">A simple question</div><p>Complete the thought: “A memory is a place we can ___.”</p><label for="answer">Your answer</label><div class="answerrow"><input id="answer" type="text" placeholder="Write a word…" autocomplete="off"><button id="check" type="button">Check</button></div><div id="feedback" class="feedback" role="status" aria-live="polite"></div><div class="smallprint">This is a local interaction only. No analytics, tracking, forms, or reply requests are built into the page.</div></div></div></section>
-<section class="closing"><div class="wrap"><div class="eyebrow">At the end of the page</div><h2>Nothing is required.</h2><p>This archive can simply exist as a personal record. It does not ask for a reply, a decision, or anything in return.</p><div class="ornament"></div><div class="eyebrow">End of this volume</div></div></section>
+<div id="fragments-module"></div>
+<div id="timeline-module"></div>
+<div id="notes-module"></div>
+<div id="clue-module"></div>
+<div id="closing-module"></div>
 </main>
 <footer><div class="wrap">SOMEWHERE IN THE ARCHIVE · A QUIET PLACE FOR REMEMBERING</div></footer>
-<script>
-(function(){
- const input=document.getElementById('answer');
- const button=document.getElementById('check');
- const feedback=document.getElementById('feedback');
- function check(){
-   const value=input.value.trim().toLowerCase();
-   if(!value){feedback.textContent='Take your time.';return;}
-   if(['return','remember','revisit','wander'].includes(value)){
-     feedback.textContent='That will do. Some places stay with us.';
-   }else{
-     feedback.textContent='Not quite. Think of a word about going back in memory.';
-   }
- }
- button.addEventListener('click',check);
- input.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
-})();
-</script>
+<script src="assets/js/site.js"></script>
 </body>
 </html>
