@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#0b0c10">
 <title>Archive Manager</title>
 <link rel="stylesheet" href="../assets/css/admin.css">
+<style>.visual-editor-panel{padding:24px}.visual-editor-panel iframe{display:block;width:100%;height:min(82vh,1000px);min-height:620px;border:1px solid var(--line);background:#e9e2d4;margin-top:14px}.visual-editor-panel .help{margin:8px 0}.visual-editor-panel .actions{margin-top:0}@media(max-width:650px){.visual-editor-panel{padding:12px}.visual-editor-panel iframe{height:78vh;min-height:560px}}</style>
 </head>
 <body>
 <div class="shell">
@@ -37,10 +38,14 @@
       <p class="status" id="responses-status" role="status" aria-live="polite">Loading submissions…</p>
       <div id="responses-list" class="responses-list"></div>
     </section>
-    <form id="editor-form" class="panel"><div id="editor-fields"></div>
-      <div class="actions"><button class="button" id="save-button" type="submit">Save and publish</button><span class="status" id="save-status" role="status" aria-live="polite"></span></div>
-    </form>
-    <p class="small">Photos uploaded here are public because they appear on the public archive. Only upload images you have permission to share.</p>
+    <section class="panel visual-editor-panel" id="visual-editor-panel">
+      <div class="responses-head"><div><div class="eyebrow">Live page editor</div><h2>Edit the website itself</h2><p class="help">This is the actual public page. Turn editing on, click any highlighted text to change it, then save.</p></div>
+        <div class="actions"><button class="button secondary" id="toggle-visual-edit" type="button">Enable editing</button><button class="button" id="save-visual-edit" type="button" disabled>Save changes</button></div>
+      </div>
+      <p class="status" id="save-status" role="status" aria-live="polite">Loading the live page…</p>
+      <iframe id="site-preview" title="Live website preview" src="../" loading="lazy"></iframe>
+      <p class="small">Your edits change the text on the public page. The original layout, colours, paper textures and spacing stay the same.</p>
+    </section>
   </section>
 </div>
 <script type="module" src="../assets/js/admin.js"></script>
