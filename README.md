@@ -23,6 +23,7 @@ The public archive is a static GitHub Pages site. Its private editor lives at /m
 - Do not upload private conversations, personal information, or photographs unless you have permission to publish them.
 
 ## First-time setup still required
-1. In Supabase Authentication, invite the configured administrator email and accept the invitation to set a password.
-2. In Project Settings > API / Data API, ensure public.archive_content is exposed to the Data API. Its SQL grants and Row Level Security policies are already configured.
-3. Add https://locacollection.github.io and https://locacollection.github.io/Shahwarda07/manage/ to the Auth redirect URL allowlist if you use password recovery.
+1. In Supabase Authentication > URL Configuration, set the Site URL to https://locacollection.github.io/Shahwarda07/manage/ and add that same URL to the Redirect URLs allowlist.
+2. In Supabase Authentication > Users, choose Add user > Send invitation and invite the configured administrator email. Accept the invitation from the email on the same browser where you will use the editor. The editor includes a password update form.
+3. In Project Settings > API / Data API, expose public.archive_content to the Data API. Its SQL grants and Row Level Security policies are already configured.
+4. After the invitation is accepted, open https://locacollection.github.io/Shahwarda07/manage/ and set a password in Account security.
