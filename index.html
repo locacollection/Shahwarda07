@@ -115,5 +115,31 @@ if (authCallback) {
   }
 }
 </script>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/+esm";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./assets/js/supabase-config.js";
+const selector = ".hero h1, .hero .eyebrow, .hero .intro, .hero .small, .hero .down, main h1, main h2, main h3, main p, main .number, main .tiny, main .small, main .eyebrow, main .intro, main .paper.poem, .final .small, .footer";
+try {
+  const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+  });
+  const { data, error } = await client.from("archive_content").select("content").eq("id", "main").maybeSingle();
+  if (error) throw error;
+  const edits = data?.content?.visual_edits;
+  if (edits && typeof edits === "object") {
+    document.querySelectorAll(selector).forEach((element, index) => {
+      const value = edits["v1-" + index];
+      if (typeof value === "string") {
+        element.textContent = value;
+        element.style.whiteSpace = "pre-line";
+      }
+    });
+  }
+} catch (error) {
+  console.info("The archive is showing its built-in text.", error);
+}
+</script>
+
 </body>
 </html>
