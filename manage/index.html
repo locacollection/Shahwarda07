@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b0c10">
+<title>Archive Manager</title>
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+<div class="shell">
+  <div class="top"><a class="brand" href="../">← View public archive</a><span class="eyebrow">Private editor</span></div>
+  <section id="login-panel" class="panel login">
+    <div class="eyebrow">Somewhere in the Archive</div><h1>Sign in</h1>
+    <p class="help">This area is reserved for the archive administrator.</p>
+    <form id="login-form">
+      <div class="field"><label for="email">Administrator email</label><input id="email" type="email" value="ldeo4442@gmail.com" readonly autocomplete="username"></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password" placeholder="Your password"></div>
+      <div class="actions"><button class="button" id="login-button" type="submit">Sign in</button><button class="button secondary" id="reset-button" type="button">Send password reset</button></div>
+      <p class="status" id="login-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+  <section id="editor-panel" class="hidden">
+    <div class="editor-head"><div><div class="eyebrow">Archive Manager</div><h1>Edit the archive</h1><p>Changes are saved to the live site when you publish.</p></div>
+      <div class="actions"><a class="button secondary" href="../" target="_blank" rel="noopener">Preview public site</a><button class="button secondary" id="logout-button" type="button">Sign out</button></div>
+    </div>
+    <form id="editor-form" class="panel"><div id="editor-fields"></div>
+      <div class="actions"><button class="button" id="save-button" type="submit">Save and publish</button><span class="status" id="save-status" role="status" aria-live="polite"></span></div>
+    </form>
+    <p class="small">Photos uploaded here are public because they appear on the public archive. Only upload images you have permission to share.</p>
+  </section>
+</div>
+<script type="module" src="../assets/js/admin.js"></script>
+</body>
+</html>
