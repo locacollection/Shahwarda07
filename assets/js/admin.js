@@ -129,7 +129,8 @@ async function loadDashboard(user) {
 document.getElementById("login-form").addEventListener("submit", async event => {
   event.preventDefault();
   const button = document.getElementById("login-button"); button.disabled = true; loginStatus.textContent = "Sending a sign-in link…";
-  const { error } = await supabase.auth.signInWithOtp({ email: ADMIN_EMAIL });
+  const redirectTo = new URL("./", window.location.href).href;
+  const { error } = await supabase.auth.signInWithOtp({ email: ADMIN_EMAIL, options: { emailRedirectTo: redirectTo } });
   button.disabled = false;
   loginStatus.textContent = error
     ? "Could not send the sign-in link. Please try again later."
