@@ -142,3 +142,18 @@ supabase.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_OUT") { currentUser = null; showLogin(); }
   else if (event === "SIGNED_IN" && session) queueMicrotask(() => loadDashboard(session.user));
 });
+
+
+document.getElementById("password-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const password = document.getElementById("new-password").value;
+  const confirmation = document.getElementById("confirm-password").value;
+  const status = document.getElementById("password-status");
+  if (password.length < 10) { status.textContent = "Use at least 10 characters."; return; }
+  if (password !== confirmation) { status.textContent = "The passwords do not match."; return; }
+  status.textContent = "Updating password…";
+  const { error } = await supabase.auth.updateUser({ password });
+  status.textContent = error ? "Could not update the password. Please try again." : "Password updated.";
+  if (error) console.error(error);
+  else { document.getElementById("new-password").value = ""; document.getElementById("confirm-password").value = ""; }
+});
