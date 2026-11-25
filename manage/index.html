@@ -25,6 +25,7 @@
     <div class="editor-head"><div><div class="eyebrow">Archive Manager</div><h1>Edit the archive</h1><p>Changes are saved to the live site when you publish.</p></div>
       <div class="actions"><a class="button secondary" href="../" target="_blank" rel="noopener">Preview public site</a><button class="button secondary" id="logout-button" type="button">Sign out</button></div>
     </div>
+    <section class="panel" id="account-panel"><div class="eyebrow">Account security</div><h2>Set or change your password</h2><p class="help">Use this after accepting the administrator invitation, or whenever you want to update your password.</p><form id="password-form"><div class="field"><label for="new-password">New password</label><input id="new-password" type="password" minlength="10" required autocomplete="new-password"></div><div class="field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" minlength="10" required autocomplete="new-password"></div><div class="actions"><button class="button secondary" type="submit">Update password</button><span class="status" id="password-status" role="status" aria-live="polite"></span></div></form></section>
     <form id="editor-form" class="panel"><div id="editor-fields"></div>
       <div class="actions"><button class="button" id="save-button" type="submit">Save and publish</button><span class="status" id="save-status" role="status" aria-live="polite"></span></div>
     </form>
