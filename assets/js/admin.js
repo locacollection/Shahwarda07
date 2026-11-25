@@ -110,6 +110,25 @@ async function refreshResponses() {
   renderResponses();
 }
 document.getElementById("refresh-responses").addEventListener("click", refreshResponses);
+document.getElementById("reset-visitors").addEventListener("click", async () => {
+  if (!currentUser) return;
+  const confirmed = window.confirm("Reset the visitor count to 0? This permanently clears the recorded unique-browser count. Messages and survey responses will not be deleted.");
+  if (!confirmed) return;
+  const button = document.getElementById("reset-visitors");
+  const status = document.getElementById("responses-status");
+  button.disabled = true;
+  status.textContent = "Resetting visitor count…";
+  const { data, error } = await supabase.rpc("reset_archive_visitors");
+  button.disabled = false;
+  if (error) {
+    status.textContent = "Could not reset the visitor count. Please try again.";
+    console.error(error);
+    return;
+  }
+  await refreshResponses();
+  status.textContent = "Visitor count reset to 0. " + Number(data || 0).toLocaleString() + " recorded browsers were cleared. Messages and survey responses were kept.";
+});
+
 document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
   activeResponseFilter = button.dataset.filter;
   document.querySelectorAll("[data-filter]").forEach(item => item.classList.toggle("active", item === button));
